@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Version 2{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
+{% endblock %}
+
+{% block body %}
+  <div id="map"></div>
+{% endblock body %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static',filename='js/params.js') }}"></script>
+<script src="{{ url_for('static',filename='js/design.js') }}"></script>
+<script src="{{ url_for('static',filename='js/carteTest.js') }}"></script>
+<script src="{{ url_for('static',filename='js/dalles_download.js') }}"></script>
+<script src="https://kit.fontawesome.com/67a3c07583.js" crossorigin="anonymous"></script>
+{% endblock js %}

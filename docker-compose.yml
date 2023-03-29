@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  demo-pcrs:
+    container_name: demo-pcrs
+    command: python3 run_prod.py
+    build:
+      context: "."  
+      dockerfile: Dockerfile
+      args:    
+        - http_proxy
+        - https_proxy
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+      SCHEMA_DALLE: ${SCHEMA_DALLE}
+      SCHEMA_CHANTIER: ${SCHEMA_CHANTIER}
+      HOST_SERVEUR: ${HOST_SERVEUR}
+      HOST: ${HOST}
+    ports:
+      - '5000:5000'
+    restart: on-failure
+    depends_on:
+      - postgresql
+
+  postgresql:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+      SCHEMA_DALLE: ${SCHEMA_DALLE}
+      SCHEMA_CHANTIER: ${SCHEMA_CHANTIER}
+      HOST_SERVEUR: ${HOST_SERVEUR}
+      HOST: ${HOST}
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=louis.ardilly@yahoo.fr
+      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASSWORD}
+      - HTTP_PROXY=${HTTP_PROXY}
+      - HTTPS_PROXY=${HTTPS_PROXY}
+    ports:
+      - "8080:80"
+    links:
+      - postgresql:postgres
+    depends_on:
+      - postgresql
