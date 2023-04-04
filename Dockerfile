@@ -10,7 +10,7 @@ RUN python3 -m pip install --upgrade pip
 RUN pip install --upgrade setuptools
 RUN pip3 install -r requirements.txt
 
-ENTRYPOINT ["python3", "create_table.py"]
-ENTRYPOINT ["python3", "migration.py"]
+# ENTRYPOINT ["python3", "bdd/create_database.py"]
+ENTRYPOINT ["python3", "bdd/migration.py"]
 
 CMD ["python3", "run_prod.py"]

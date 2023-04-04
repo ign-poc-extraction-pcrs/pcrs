@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from psycopg2 import Error
 
 class Postgres:
@@ -17,26 +18,30 @@ class Postgres:
         # connexion à la base de données
         try:
             self.connection = psycopg2.connect(user=user, password=password, host=host, database=database, port="5432")
-            self.cursor = self.connection.cursor()
+            
+            self.cursor = self.connection.cursor(cursor_factory=RealDictCursor)
         except (Exception, Error) as error:
             print("Erreur lors de la connexion à la base de données :", error)
 
-    def create_table(self):
-        self.cursor.execute("""
-            CREATE TABLE test (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(50),
-                age INTEGER
-            );
-        """)
+    def create_extension(self):
+        self.connection.autocommit = True 
+        sql = '''CREATE EXTENSION IF NOT EXISTS postgis''';
+        self.cursor.execute(sql)
+
+
+    def create_table(self, requete):
+        self.cursor.execute(requete)
         self.connection.commit()
     
-    def insert(self):
+    def insert(self, table, column, column_not_duplicate, data):
         try:
-            # exemple d'insertion de données dans une table
-            insert_query = "INSERT INTO test (name, age) VALUES ( %s, %s)"
-            record_to_insert = ("value2", "value3")
-            self.cursor.execute(insert_query, record_to_insert)
+            for d in data:
+                self.cursor.execute(f"SELECT {column_not_duplicate} FROM {table} WHERE {column_not_duplicate} = '{d[column_not_duplicate]}'")
+                # si la données n'est pas déjà en base on ne l'insere pas
+                if not len(self.cursor.fetchall()) > 0:
+                    requete = f"INSERT INTO {table} {column} VALUES (%s, %s)"
+                    content = tuple(d.values())
+                    self.cursor.execute(requete, content)
             self.connection.commit()
         except (Exception, Error) as error:
             print("Erreur lors de l'insertion de données :", error)
