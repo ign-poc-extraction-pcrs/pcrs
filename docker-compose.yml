@@ -1,40 +1,40 @@
 version: '3.7'
 
 services:
-  postgresql:
-    build:
-      context: "."  
-      dockerfile: Dockerfile_postgres
-    ports:
-      - "5432:5432"
-    restart: always
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: pcrs
-      HTTP_PROXY: ${HTTP_PROXY}
-      HTTPS_PROXY: ${HTTPS_PROXY}
+  db:
+    image: kartoza/postgis:15-3.3
     # volumes:
-    #   - ./data:/var/lib/postgresql/data
+    #   - postgis-data:/var/lib/postgresql
+    #   - dbbackups:/backups
+    environment:
+      # If you need to create multiple database you can add coma separated databases eg gis,data
+      - POSTGRES_DB=gis
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      - ALLOW_IP_RANGE=0.0.0.0/0
+      # Add extensions you need to be enabled by default in the DB. Default are the five specified below
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
+      - RUN_AS_ROOT=true
+    ports:
+      - "5432"
+    restart: on-failure
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "root"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: "PGPASSWORD=docker pg_isready -h 127.0.0.1 -U docker -d gis"
+      interval: 10s
+      timeout: 10s
+      retries: 4
 
   adminer:
     image: adminer
     restart: always
     depends_on:
-      - postgresql
+      db:
+        condition: service_healthy
     ports:
       - 8080:8080
   
   demo-pcrs:
     container_name: demo-pcrs
-    command: python3 run_prod.py
     build:
       context: "."  
       dockerfile: Dockerfile
@@ -55,40 +55,7 @@ services:
       - '5000:5000'
     restart: on-failure
     depends_on:
-      postgresql:
+      db:
         condition: service_healthy
 
 
-
-  # postgresql:
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${DATABASE}
-  #     SCHEMA_DALLE: ${SCHEMA_DALLE}
-  #     SCHEMA_CHANTIER: ${SCHEMA_CHANTIER}
-  #     HOST_SERVEUR: ${HOST_SERVEUR}
-  #     HOST: ${HOST}
-  #     HTTP_PROXY: ${HTTP_PROXY}
-  #     HTTPS_PROXY: ${HTTPS_PROXY}
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - ./data:/var/lib/postgresql/data
-
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   restart: always
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=louis.ardilly@yahoo.fr
-  #     - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASSWORD}
-  #     - HTTP_PROXY=${HTTP_PROXY}
-  #     - HTTPS_PROXY=${HTTPS_PROXY}
-  #   ports:
-  #     - "8080:80"
-  #   links:
-  #     - postgresql:postgres
-  #   depends_on:
-  #     - postgresql

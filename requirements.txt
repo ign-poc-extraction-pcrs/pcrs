@@ -23,6 +23,7 @@ shapely==2.0.1
 beautifulsoup4==4.11.2
 lxml==4.9.2
 python-dotenv==1.0.0 
+Flask-Cors==3.0.10 
 
 
 

@@ -11,6 +11,6 @@ RUN pip install --upgrade setuptools
 RUN pip3 install -r requirements.txt
 
 # ENTRYPOINT ["python3", "bdd/create_database.py"]
-ENTRYPOINT ["python3", "bdd/migration.py"]
+ENTRYPOINT ["/bin/bash", "./bdd/docker-entrypoint.sh"]
 
-CMD ["python3", "run_prod.py"]
+# CMD ["python3", "run_prod.py"]

@@ -8,3 +8,4 @@ grille_dalle.json
 config_serveur.json
 file_path_dalle_lidar.json
 dalle_lidar_classe.geojson
+.env

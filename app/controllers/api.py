@@ -6,24 +6,21 @@ import psycopg2.extras
 from pathlib import Path
 from datetime import date
 from app.controllers.Config import Config
+from dotenv import load_dotenv
 
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
-KEY_JSON_BDD = "bdd"
-KEY_JSON_SERVEUR = "host_serveur"
-PATH_KEY_SERVEUR = Path(__file__).parent / "../../config_serveur.json"
-
-
 @api.route('/get/config/serveur')
 def get_config_serveur():
+    load_dotenv()
     # recupere le serveur
     statut = "failure"
-    key = Config.get_config_json(PATH_KEY_SERVEUR, KEY_JSON_SERVEUR)
-    if key :
+    host = os.environ.get('HOST_SERVEUR')
+    if host :
         statut = "success"
 
-    return jsonify({"statut": statut, "result": key})
+    return jsonify({"statut": statut, "result": host})
 
 @api.route('/get/dalle')
 def get_dalle():
@@ -45,12 +42,12 @@ def get_dalle():
 
 @api.route('/get/chantiers/<float(signed=True):x_min>/<float(signed=True):y_min>/<float(signed=True):x_max>/<float(signed=True):y_max>', methods=['GET', 'POST'])
 def get_chantier(x_min=None, y_min=None, x_max=None, y_max=None):
-    info_bdd = Config.get_config_json(PATH_KEY_SERVEUR, KEY_JSON_BDD)
-    bdd = get_connexion_bdd(info_bdd)
+    load_dotenv()
+    bdd = get_connexion_bdd()
     # si il n'y a aucun probleme avec la connexion à la base
     if bdd :
         #  on recupere les dalles qui sont dans la bbox envoyer
-        bdd.execute(f"SELECT bloc, ST_AsGeoJson(st_transform(st_setsrid(geom_chantier, 2154),4326)) as polygon FROM {info_bdd['schema_chantier']} WHERE geom_chantier && ST_MakeEnvelope({x_min}, {y_min}, {x_max}, {y_max}) AND mise_en_ligne = true")
+        bdd.execute(f"SELECT bloc, ST_AsGeoJson(st_transform(st_setsrid(geom_chantier, 2154),4326)) as polygon FROM {os.environ.get('SCHEMA_CHANTIER')} WHERE geom_chantier && ST_MakeEnvelope({x_min}, {y_min}, {x_max}, {y_max})")
         chantiers = bdd.fetchall()
         statut = "success"
         bdd.close()
@@ -61,12 +58,12 @@ def get_chantier(x_min=None, y_min=None, x_max=None, y_max=None):
 
 @api.route('/get/dalles/<float(signed=True):x_min>/<float(signed=True):y_min>/<float(signed=True):x_max>/<float(signed=True):y_max>', methods=['GET', 'POST'])
 def get_dalles(x_min=None, y_min=None, x_max=None, y_max=None):
-    info_bdd = Config.get_config_json(PATH_KEY_SERVEUR, KEY_JSON_BDD)
-    bdd = get_connexion_bdd(info_bdd)
+    load_dotenv()
+    bdd = get_connexion_bdd()
     # si il n'y a aucun probleme avec la connexion à la base
     if bdd :
         #  on recupere les dalles qui sont dans la bbox envoyer
-        bdd.execute(f"SELECT id, nom, ST_AsGeoJson(st_setsrid(geom, 2154)) as polygon FROM {info_bdd['schema_dalle']} WHERE geom && ST_MakeEnvelope({x_min}, {y_min}, {x_max}, {y_max})")
+        bdd.execute(f"SELECT id, nom, ST_AsGeoJson(st_setsrid(geom, 2154)) as polygon FROM {os.environ.get('SCHEMA_DALLE')} WHERE geom && ST_MakeEnvelope({x_min}, {y_min}, {x_max}, {y_max})")
         dalles = bdd.fetchall()
         dalles = get_coordonees(dalles)
         dalles = new_format_dalle(dalles)
@@ -79,15 +76,16 @@ def get_dalles(x_min=None, y_min=None, x_max=None, y_max=None):
 
 
 
-def get_connexion_bdd(info_bdd):
+def get_connexion_bdd():
     """ Connexion à la base de données pour accéder aux dalles pcrs
 
     Returns:
         cursor: curseur pour executer des requetes à la base
     """
     try :
-        # conn = psycopg2.connect(database="test", user="postgres", host="localhost", password="root")
-        conn = psycopg2.connect(database=info_bdd["database"], user=info_bdd["user"], host=info_bdd["host"], password=info_bdd["password"])
+        load_dotenv()
+
+        conn = psycopg2.connect(database=os.environ.get('POSTGRES_DB'), user=os.environ.get('POSTGRES_USER'), host=os.environ.get('HOST'), password=os.environ.get('POSTGRES_PASSWORD'), port=5432)
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     except psycopg2.OperationalError as e:
         return False

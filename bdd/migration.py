@@ -2,14 +2,21 @@ from postgres import Postgres
 
 p = Postgres()
 p.connection()
-p.create_extension()
+# p.create_extension()
 p.create_table("""
-            CREATE TABLE IF NOT EXISTS testt (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(50),
-                age INTEGER,
-                geom_chantier geometry NULL
-            );
+            CREATE TABLE IF NOT EXISTS dalle (
+            id serial PRIMARY KEY,
+            nom VARCHAR(200) NOT NULL,
+            geom geometry NOT NULL);
         """)
-p.insert("testt", "(name, age)", "name", [{"name": "cedric", "age": 65},{"name": "vic", "age": 24}])
+
+p.create_table("""
+            CREATE TABLE IF NOT EXISTS chantier (
+            id serial PRIMARY KEY,
+            bloc VARCHAR(200) NOT NULL,
+            geom_chantier geometry NULL);
+        """)
+
+p.insert("dalle", "(nom, geom)", "nom", p.get_dalle_json("dalle")["dalles"])
+p.insert("chantier", "(bloc, geom_chantier)", "bloc", p.get_dalle_json("chantier")["dalles"])
 p.close_connection()
