@@ -19,7 +19,7 @@ services:
       - "5432"
     restart: on-failure
     healthcheck:
-      test: "PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h 127.0.0.1 -U $POSTGRES_USER -d $POSTGRES_DB"
+      test: "PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h 127.0.0.1 -U $POSTGRES_USER -d $DATABASE"
       interval: 10s
       timeout: 10s
       retries: 4
