@@ -17,9 +17,10 @@ class Postgres:
         database = os.environ.get('PGDATABASE')
         user = os.environ.get('PGUSER')
         password = os.environ.get('PGPASSWORD')
+        port = os.environ.get('PGPORT')
         # connexion à la base de données
         try:
-            self.connection = psycopg2.connect(user=user, password=password, host=host, database=database, port="5432")
+            self.connection = psycopg2.connect(user=user, password=password, host=host, database=database, port=port)
             
             self.cursor = self.connection.cursor(cursor_factory=RealDictCursor)
         except (Exception, Error) as error:
