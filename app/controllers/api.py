@@ -85,7 +85,7 @@ def get_connexion_bdd():
     try :
         load_dotenv()
 
-        conn = psycopg2.connect(database=os.environ.get('POSTGRES_DB'), user=os.environ.get('POSTGRES_USER'), host=os.environ.get('HOST'), password=os.environ.get('POSTGRES_PASSWORD'), port=5432)
+        conn = psycopg2.connect(database=os.environ.get('PGDATABASE'), user=os.environ.get('PGUSER'), host=os.environ.get('PGHOST'), password=os.environ.get('PGPASSWORD'), port=5432)
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     except psycopg2.OperationalError as e:
         return False

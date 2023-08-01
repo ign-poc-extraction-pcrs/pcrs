@@ -13,10 +13,10 @@ class Postgres:
     def connection(self):
         load_dotenv()
         # informations de connexion à la base de données
-        host = os.environ.get('HOST')
-        database = os.environ.get('POSTGRES_DB')
-        user = os.environ.get('POSTGRES_USER')
-        password = os.environ.get('POSTGRES_PASSWORD')
+        host = os.environ.get('PGHOST')
+        database = os.environ.get('PGDATABASE')
+        user = os.environ.get('PGUSER')
+        password = os.environ.get('PGPASSWORD')
         # connexion à la base de données
         try:
             self.connection = psycopg2.connect(user=user, password=password, host=host, database=database, port="5432")
