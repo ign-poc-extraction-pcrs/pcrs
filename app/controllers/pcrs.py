@@ -17,6 +17,10 @@ def index():
 def interface():
     return render_template('pages/version2.html')
 
+@pcrs.route('/version2', methods=['GET', 'POST'])
+def interface():
+    return redirect(url_for('pcrs.interface'))
+
 @pcrs.route('/download/<int:x_min>-<int:y_min>-<int:x_max>-<int:y_max>-<annee>-<proj>-<resolution>-<canaux>')
 @pcrs.route('/download', methods=['GET', 'POST'])
 def download(x_min=None, y_min=None, x_max=None, y_max=None, annee=None, proj=None, resolution=None, canaux=None):
