@@ -18,7 +18,7 @@ def interface():
     return render_template('pages/version2.html')
 
 @pcrs.route('/version2', methods=['GET', 'POST'])
-def interface():
+def version2():
     return redirect(url_for('pcrs.interface'))
 
 @pcrs.route('/download/<int:x_min>-<int:y_min>-<int:x_max>-<int:y_max>-<annee>-<proj>-<resolution>-<canaux>')
