@@ -85,7 +85,7 @@ function popup(layer, type = "open") {
     template = `<h4>${nom_dalle}</h4>`
 
     if (type == "open") {
-        layer.bindPopup(template).openPopup()
+        layer.bindPopup(template, {autoPan: false}).openPopup()
     } else {
         layer.bindPopup(template).closePopup()
     }
